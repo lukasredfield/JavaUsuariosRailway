@@ -2,6 +2,7 @@ package com.example.demo.controllers;
 
 import com.example.demo.dao.UsuarioDao;
 import com.example.demo.models.Usuario;
+import com.example.demo.utils.JWTUtil;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.ArrayList;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.servlet.view.RedirectView;
+
 
 @RestController
 public class UsuarioController {
@@ -16,26 +21,23 @@ public class UsuarioController {
     @Autowired
     private UsuarioDao usuarioDao;
 
-    @RequestMapping(value = "usuario/{id}", method = RequestMethod.GET)  //nombre de la url
-    public Usuario getUsuario(@PathVariable Long id){
-        Usuario usuario = new Usuario();
-        usuario.setId(id);
-        usuario.setNombre("Lucas");
-        usuario.setApellido("Guido");
-        usuario.setEmail("lukasredfield@gmail.com");
-        usuario.setTelefono("123456789");
+    @Autowired
+    private JWTUtil jwtUtil;
 
-        return usuario;
-    }
-
-    @RequestMapping(value = "api/usuarios", method = RequestMethod.GET)  //nombre de la url
-    public List<Usuario> getUsuarios(){
+    @RequestMapping(value = "api/usuarios", method = RequestMethod.GET)
+    public List<Usuario> getUsuarios(@RequestHeader(value="Authorization") String token) {
+        if (!validarToken(token)) { return null; }
 
         return usuarioDao.getUsuarios();
     }
 
+    private boolean validarToken(String token) {
+        String usuarioId = jwtUtil.getKey(token);
+        return usuarioId != null;
+    }
+
     @RequestMapping(value = "api/usuarios", method = RequestMethod.POST)
-    public void registrarUsuarios(@RequestBody Usuario usuario){
+    public void registrarUsuario(@RequestBody Usuario usuario) {
 
         Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id);
         String hash = argon2.hash(1, 1024, 1, usuario.getPassword());
@@ -44,37 +46,11 @@ public class UsuarioController {
         usuarioDao.registrar(usuario);
     }
 
-    @RequestMapping(value = "usuario23")  //nombre de la url
-    public Usuario editar(){
-        Usuario usuario = new Usuario();
-        usuario.setNombre("Lucas");
-        usuario.setApellido("Guido");
-        usuario.setEmail("lukasredfield@gmail.com");
-        usuario.setTelefono("123456789");
-        return usuario;
-
-    }
-
     @RequestMapping(value = "api/usuarios/{id}", method = RequestMethod.DELETE)
-    public void eliminarUsuario(@PathVariable Long id) {
+    public void eliminar(@RequestHeader(value="Authorization") String token,
+                         @PathVariable Long id) {
+        if (!validarToken(token)) { return; }
         usuarioDao.eliminar(id);
-
-    }
-
-    @RequestMapping(value = "usuario27")  //nombre de la url
-    public Usuario buscar(){
-        Usuario usuario = new Usuario();
-        usuario.setNombre("Lucas");
-        usuario.setApellido("Guido");
-        usuario.setEmail("lukasredfield@gmail.com");
-        usuario.setTelefono("123456789");
-        return usuario;
-
     }
 
 }
-
-//
-//
-
-

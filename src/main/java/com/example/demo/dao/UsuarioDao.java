@@ -5,6 +5,7 @@ import com.example.demo.models.Usuario;
 import java.util.List;
 
 public interface UsuarioDao {
+
     List<Usuario> getUsuarios();
 
     void eliminar(Long id);
@@ -12,6 +13,4 @@ public interface UsuarioDao {
     void registrar(Usuario usuario);
 
     Usuario obtenerUsuarioPorCredenciales(Usuario usuario);
-
-    void verificarEmailPassword(Usuario usuario);
 }

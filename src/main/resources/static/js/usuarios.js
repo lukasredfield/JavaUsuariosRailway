@@ -6,8 +6,12 @@ $(document).ready(function() {
 });
 
 function actualizarEmailDelUsuario() {
-    document.getElementById('txt-email-usuario').outerHTML = localStorage.email;
+  let email = document.getElementById('txtEmail');
+  if (email != null) {
+    email.outerHTML = localStorage.email;
+  }
 }
+
 
 
 async function cargarUsuarios() {
